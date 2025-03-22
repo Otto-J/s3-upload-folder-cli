@@ -1,0 +1,97 @@
+#!/usr/bin/env node
+
+import { uploadFolder } from "./upload";
+
+function parseArgs(): { [key: string]: any } {
+  const args = process.argv.slice(2);
+  const options: { [key: string]: any } = {};
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg.startsWith("--")) {
+      const key = arg.slice(2);
+      if (i + 1 < args.length && !args[i + 1].startsWith("-")) {
+        options[key] = args[++i];
+      } else {
+        options[key] = true;
+      }
+    } else if (arg.startsWith("-")) {
+      // 处理短参数（支持 -d 等）
+      const key = arg.slice(1);
+      if (i + 1 < args.length && !args[i + 1].startsWith("-")) {
+        options[key] = args[++i];
+      } else {
+        options[key] = true;
+      }
+    }
+  }
+  return options;
+}
+
+function printUsage() {
+  console.log(`用法:
+  node dist/cli.js -d <localFolderPath> -b <bucketName> -ak <accessKeyId> -sk <secretAccessKey> [可选参数]
+
+必选参数:
+  -d, --dist           本地要上传的文件夹路径
+  -b, --bucketName     目标 S3 bucket 名称
+  -ak, --ak            Access Key ID
+  -sk, --sk            Secret Access Key
+
+可选参数:
+  -e, --endpoint       S3 endpoint URL，用于非 AWS 服务
+  -r, --region         AWS region (默认: us-east-1)
+  -p, --prefix         远程路径前缀 (默认: 空)
+      --forcePathStyle 布尔值，启用 path-style 访问 (默认: true)
+`);
+}
+
+const options = parseArgs();
+
+// 校验必选参数
+const required = [
+  { keys: ["d", "dist"], name: "dist" },
+  { keys: ["b", "bucketName"], name: "bucketName" },
+  { keys: ["ak"], name: "ak" },
+  { keys: ["sk"], name: "sk" },
+];
+
+const missing = [];
+for (const req of required) {
+  let found = false;
+  for (const key of req.keys) {
+    if (options[key] !== undefined) {
+      // 将值统一赋给属性名
+      options[req.name] = options[key];
+      found = true;
+      break;
+    }
+  }
+  if (!found) {
+    missing.push(req.name);
+  }
+}
+
+if (missing.length > 0) {
+  console.error(`缺少必选参数: ${missing.join(", ")}`);
+  printUsage();
+  process.exit(1);
+}
+
+// 设置可选参数默认值
+options.region = options.r || options.region || "us-east-1";
+options.prefix = options.p || options.prefix || "";
+if (options.forcePathStyle === undefined) {
+  options.forcePathStyle = true;
+}
+
+uploadFolder({
+  localFolderPath: options.dist,
+  bucketName: options.bucketName,
+  accessKeyId: options.ak,
+  secretAccessKey: options.sk,
+  endpoint: options.endpoint,
+  region: options.region,
+  prefix: options.prefix,
+  forcePathStyle: options.forcePathStyle,
+});

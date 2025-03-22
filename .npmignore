@@ -1,0 +1,15 @@
+# 忽略源码与构建相关的文件或目录
+src/
+scripts/
+tsconfig.json
+
+# 忽略调试及日志文件
+npm-debug.log*
+*.log
+
+# 忽略构建锁文件及 node_modules 目录（由 npm 自动生成）
+bun.lockb
+node_modules/
+
+# 忽略 Git 文件
+.gitignore
