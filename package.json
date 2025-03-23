@@ -1,6 +1,6 @@
 {
   "name": "@web.worker/s3-upload-folder",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "一个用于通过命令行上传文件夹到 AWS S3 的 CLI 工具",
   "type": "module",
   "main": "dist/index.js",
@@ -9,7 +9,10 @@
     "s3uploadFolder": "./dist/index.js"
   },
   "scripts": {
-    "build": "bun build ./src/index.ts --outdir ./dist --target node"
+    "preinstall": "npx only-allow bun",
+    "build": "bun build ./src/index.ts --outdir ./dist --target node",
+    "publish": "npm publish --access public",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "aws",

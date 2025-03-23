@@ -30,11 +30,11 @@ function parseArgs(): { [key: string]: any } {
 
 function printUsage() {
   console.log(`用法:
-  node dist/cli.js -d <localFolderPath> -b <bucketName> -ak <accessKeyId> -sk <secretAccessKey> [可选参数]
+  npx @web.worker/s3-upload-folder -d <localFolderPath> -b <bucket> -ak <accessKeyId> -sk <secretAccessKey> [可选参数]
 
 必选参数:
   -d, --dist           本地要上传的文件夹路径
-  -b, --bucketName     目标 S3 bucket 名称
+  -b, --bucket     目标 S3 bucket 名称
   -ak, --ak            Access Key ID
   -sk, --sk            Secret Access Key
 
@@ -51,7 +51,7 @@ const options = parseArgs();
 // 校验必选参数
 const required = [
   { keys: ["d", "dist"], name: "dist" },
-  { keys: ["b", "bucketName"], name: "bucketName" },
+  { keys: ["b", "bucket"], name: "bucket" },
   { keys: ["ak"], name: "ak" },
   { keys: ["sk"], name: "sk" },
 ];
@@ -87,7 +87,7 @@ if (options.forcePathStyle === undefined) {
 
 uploadFolder({
   localFolderPath: options.dist,
-  bucketName: options.bucketName,
+  bucket: options.bucket,
   accessKeyId: options.ak,
   secretAccessKey: options.sk,
   endpoint: options.endpoint,

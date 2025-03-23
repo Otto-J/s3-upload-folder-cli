@@ -2,7 +2,7 @@
 
 ## 开发背景
 
-> 这样吧，你封装成一个 npm 包好了，名字就叫 @web.worker/s3-upload-folder，用户可以通过 npx @web.worker/s3-upload-folder --dist dist/ --ak xx --sk xx --endpoint xx --bucketName xx ，可能还有我没想到的。你做个补充。使用 esm+ts 实现。
+> 这样吧，你封装成一个 npm 包好了，名字就叫 @web.worker/s3-upload-folder，用户可以通过 npx @web.worker/s3-upload-folder --dist dist/ --ak xx --sk xx --endpoint xx --bucket xx ，可能还有我没想到的。你做个补充。使用 esm+ts 实现。
 
 ## 介绍
 
@@ -19,7 +19,7 @@ npx @web.worker/s3-upload-folder \
   --sk $SECRET_KEY \
   --endpoint $ENDPOINT \
   --region $REGION \
-  --bucketName $BUCKET_NAME \
+  --bucket $BUCKET_NAME \
   --prefix /
 ```
 
@@ -28,7 +28,7 @@ npx @web.worker/s3-upload-folder \
 - `--dist`：本地目录路径，待上传的文件夹 **(必填)**。
 - `--ak`：Access Key ID **(必填)**。
 - `--sk`：Secret Access Key **(必填)**。
-- `--bucketName`：目标存储桶名称 **(必填)**。
+- `--bucket`：目标存储桶名称 **(必填)**。
 - `--endpoint`：S3 接口的 endpoint（对于非 AWS 服务可选）。
 - `--region`：存储区域，默认值为 `us-east-1`。
 - `--prefix`：上传至存储桶的远程路径前缀，默认留空。

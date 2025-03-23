@@ -5,7 +5,7 @@ import path from "node:path";
 
 export async function uploadFolder({
   localFolderPath,
-  bucketName,
+  bucket,
   accessKeyId,
   secretAccessKey,
   endpoint,
@@ -14,7 +14,7 @@ export async function uploadFolder({
   forcePathStyle = true,
 }: {
   localFolderPath: string;
-  bucketName: string;
+  bucket: string;
   accessKeyId: string;
   secretAccessKey: string;
   endpoint?: string;
@@ -38,13 +38,24 @@ export async function uploadFolder({
     const fileContent = fs.readFileSync(file);
 
     const command = new PutObjectCommand({
-      Bucket: bucketName,
+      Bucket: bucket,
       Key: remoteKey,
       Body: fileContent,
     });
 
     try {
       await s3Client.send(command);
+      const currentIndex = files.indexOf(file) + 1;
+      const total = files.length;
+      const percentage = Math.floor((currentIndex / total) * 100);
+      const progressBar =
+        "[" +
+        "=".repeat(Math.floor(percentage / 5)) +
+        " ".repeat(20 - Math.floor(percentage / 5)) +
+        "]";
+      process.stdout.write(
+        `\r${progressBar} ${currentIndex}/${total} (${percentage}%)`
+      );
       console.log(`Uploaded: ${remoteKey}`);
     } catch (error) {
       console.error(`Failed to upload: ${remoteKey}`, error);
