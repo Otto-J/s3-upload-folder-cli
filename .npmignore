@@ -13,3 +13,4 @@ node_modules/
 
 # 忽略 Git 文件
 .gitignore
+coverage
