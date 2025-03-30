@@ -42,7 +42,13 @@ npx @web.worker/s3-upload-folder \
   工具采用 Node.js 内置的 `fs` 模块，通过递归方式读取指定目录下的所有文件，将子文件夹及文件一并遍历。
 
 - **上传逻辑**  
-  利用 AWS SDK v3 中的 `S3Client` 和 `PutObjectCommand`，逐个将文件内容上传至目标存储桶。上传过程中会动态构造远程存储路径，支持自定义路径前缀。
+  利用 AWS SDK v3 中的 [`S3Client`](https://github.com/aws/aws-sdk-js-v3/tree/main/clients/client-s3) 和 [`PutObjectCommand`](https://github.com/aws/aws-sdk-js-v3/tree/main/clients/client-s3) 命令，逐个将文件内容上传至目标存储桶。
+
+  - **进度提示**  
+    采用内置进度条实现，每个文件上传成功或失败后，调用专门的 `updateProgress` 函数更新上传进度，并在命令行实时显示当前进度。
+
+  - **并发上传**  
+    通过将文件分批（每批同时最多上传 `maxConcurrentUploads` 个文件）执行并发上传操作，从而有效提升上传速度。
 
 - **错误处理**  
   每个文件上传均独立执行，若上传失败则打印具体的错误信息，便于用户排查。
