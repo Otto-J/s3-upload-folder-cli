@@ -1,7 +1,6 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import fs from "node:fs";
 import path from "node:path";
-import mime from "mime-types";
 //  { readdirSync, readFileSync }
 
 function createS3Client({
@@ -63,8 +62,7 @@ export async function uploadFile({
     Bucket: bucket,
     Key: remoteKey,
     Body: fileContent,
-    ContentType:
-      contentType || mime.lookup(filePath) || "application/octet-stream",
+    ...(contentType ? { ContentType: contentType } : {}),
   });
 
   try {
