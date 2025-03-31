@@ -10,6 +10,7 @@
   "scripts": {
     "preinstall": "npx only-allow bun",
     "build": "bun build ./src/index.ts --outdir ./dist --target node",
+    "build:source": "bun build ./src/index.ts --outdir ./dist --target node --sourcemap=linked",
     "publish": "npm publish --access public",
     "prepublishOnly": "npm run build",
     "test": "vitest run",

@@ -2,6 +2,17 @@
 
 import { uploadFolder, uploadFile } from "./upload";
 import fs from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// 读取 package.json 中的版本号
+const packageJson = JSON.parse(
+  fs.readFileSync(join(__dirname, "../package.json"), "utf-8")
+);
+const version = packageJson.version;
 
 function parseArgs(): { [key: string]: any } {
   const args = process.argv.slice(2);
@@ -50,10 +61,17 @@ function printUsage() {
   -p, --prefix         远程路径前缀 (默认: 空)
       --forcePathStyle 布尔值，启用 path-style 访问 (默认: true)
   --content-type       文件的 Content-Type（仅用于单个文件上传）
+  -v, --version        显示当前版本号
 `);
 }
 
 const options = parseArgs();
+
+// 处理版本号显示
+if (options.v || options.version) {
+  console.log(version);
+  process.exit(0);
+}
 
 // 校验必选参数
 const required = [
@@ -98,6 +116,7 @@ if (options.file) {
     process.exit(1);
   }
   uploadFile({
+    dist: "",
     filePath: options.file,
     bucket: options.bucket,
     accessKeyId: options.ak,
