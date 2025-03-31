@@ -1,6 +1,6 @@
 {
   "name": "@web.worker/s3-upload-folder",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "一个用于通过命令行上传文件夹到 AWS S3 的 CLI 工具",
   "type": "module",
   "main": "dist/index.js",
