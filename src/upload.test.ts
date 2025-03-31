@@ -36,7 +36,8 @@ describe("uploadFile", () => {
     mockSend.mockResolvedValueOnce({});
 
     await uploadFile({
-      filePath: "test.txt",
+      dist: "dist",
+      filePath: "dist/test.txt",
       bucket: "test-bucket",
       accessKeyId: "test-key",
       secretAccessKey: "test-secret",
@@ -59,7 +60,8 @@ describe("uploadFile", () => {
 
     await expect(
       uploadFile({
-        filePath: "test.txt",
+        dist: "dist",
+        filePath: "dist/test.txt",
         bucket: "test-bucket",
         accessKeyId: "test-key",
         secretAccessKey: "test-secret",
