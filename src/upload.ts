@@ -2,6 +2,19 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import fs from "node:fs";
 import path from "node:path";
 
+type IUploadFileParams = {
+  dist: string;
+  filePath: string;
+  bucket: string;
+  accessKeyId: string;
+  secretAccessKey: string;
+  endpoint?: string;
+  region: string;
+  prefix?: string;
+  forcePathStyle?: boolean;
+  contentType?: string;
+};
+
 function createS3Client({
   region,
   endpoint,
@@ -23,11 +36,14 @@ function createS3Client({
   });
 }
 
-function generateRemoteKey(folderPath: string, prefix: string, filepath: string) {
+export function generateRemoteKey(
+  folderPath: string,
+  prefix: string,
+  filepath: string
+) {
   // 规范化路径，确保使用统一的分隔符
   const relativePath = filepath.replace(folderPath, "").replace(/\\/g, "/");
   const remoteKey = path.join(prefix, relativePath).replace(/^\//, "");
-
 
   return remoteKey;
 }
@@ -43,18 +59,7 @@ export async function uploadFile({
   prefix = "",
   forcePathStyle = true,
   contentType,
-}: {
-  dist: string;
-  filePath: string;
-  bucket: string;
-  accessKeyId: string;
-  secretAccessKey: string;
-  endpoint?: string;
-  region: string;
-  prefix?: string;
-  forcePathStyle?: boolean;
-  contentType?: string;
-}) {
+}: IUploadFileParams) {
   const s3Client = createS3Client({
     region,
     endpoint,
@@ -78,7 +83,7 @@ export async function uploadFile({
 
   try {
     await s3Client.send(command);
-    console.log(`Uploaded: ${command.input.Key}`);
+    console.log(`Uploaded: ${remoteKey}`);
   } catch (error) {
     console.error(`Failed to upload: ${remoteKey}`, error);
     throw error;

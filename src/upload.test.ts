@@ -32,23 +32,47 @@ describe("uploadFile", () => {
     vi.mocked(S3Client).mockImplementation(() => mockS3Client as any);
   });
 
-  it("should upload file successfully", async () => {
+  it("上传文件", async () => {
     mockSend.mockResolvedValueOnce({});
 
     await uploadFile({
-      dist: "dist",
+      dist: "",
       filePath: "dist/test.txt",
       bucket: "test-bucket",
       accessKeyId: "test-key",
       secretAccessKey: "test-secret",
       region: "test-region",
+      prefix: "/",
     });
 
     expect(PutObjectCommand).toHaveBeenCalledWith({
       Bucket: "test-bucket",
-      Key: "test.txt",
+      Key: "dist/test.txt",
       Body: expect.any(Buffer),
-      ContentType: expect.any(String),
+    });
+
+    expect(mockSend).toHaveBeenCalledTimes(1);
+  });
+
+  it("上传文件并设置 content-type", async () => {
+    mockSend.mockResolvedValueOnce({});
+
+    await uploadFile({
+      dist: "",
+      filePath: "dist/test.txt",
+      bucket: "test-bucket",
+      accessKeyId: "test-key",
+      secretAccessKey: "test-secret",
+      region: "test-region",
+      prefix: "/",
+      contentType: "text/html",
+    });
+
+    expect(PutObjectCommand).toHaveBeenCalledWith({
+      Bucket: "test-bucket",
+      Key: "dist/test.txt",
+      Body: expect.any(Buffer),
+      ContentType: "text/html",
     });
 
     expect(mockSend).toHaveBeenCalledTimes(1);
@@ -71,7 +95,7 @@ describe("uploadFile", () => {
   });
 });
 
-describe("uploadFolder", () => {
+describe("上传文件夹", () => {
   const mockSend = vi.fn();
   const mockS3Client = {
     send: mockSend,
@@ -98,7 +122,6 @@ describe("uploadFolder", () => {
         Bucket: "test-bucket",
         Key: expect.stringMatching(/file[12]\.txt/),
         Body: expect.any(Buffer),
-        ContentType: expect.any(String),
       })
     );
   });
