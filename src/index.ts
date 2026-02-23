@@ -41,27 +41,39 @@ function parseArgs(): { [key: string]: any } {
 }
 
 function printUsage() {
-  console.log(`用法:
+  console.log(`S3 Upload Folder - 上传文件或文件夹到 S3 兼容存储
+
+用法:
   上传文件夹:
-  npx @web.worker/s3-upload-folder -d <localFolderPath> -b <bucket> -ak <accessKeyId> -sk <secretAccessKey> [可选参数]
+    s3-upload-folder --dist <文件夹路径> --bucket <bucket名称> --ak <AccessKey> --sk <SecretKey> [可选参数]
 
   上传单个文件:
-  npx @web.worker/s3-upload-folder --file <filePath> -b <bucket> -ak <accessKeyId> -sk <secretAccessKey> [可选参数]
+    s3-upload-folder --file <文件路径> --bucket <bucket名称> --ak <AccessKey> --sk <SecretKey> [可选参数]
 
 必选参数:
-  -d, --dist           本地要上传的文件夹路径（上传文件夹时必选）
-  --file               要上传的单个文件路径（上传单个文件时必选）
-  -b, --bucket         目标 S3 bucket 名称
-  -ak, --ak            Access Key ID
-  -sk, --sk            Secret Access Key
+  --dist, -d           本地文件夹路径（上传文件夹时必选）
+  --file               单个文件路径（上传单文件时必选）
+  --bucket, -b         目标 S3 bucket 名称
+  --ak                 Access Key ID
+  --sk                 Secret Access Key
 
 可选参数:
-  -e, --endpoint       S3 endpoint URL，用于非 AWS 服务
-  -r, --region         AWS region (默认: us-east-1)
-  -p, --prefix         远程路径前缀 (默认: 空)
-      --forcePathStyle 布尔值，启用 path-style 访问 (默认: true)
-  --content-type       文件的 Content-Type（仅用于单个文件上传）
-  -v, --version        显示当前版本号
+  --endpoint, -e       S3 endpoint URL（用于阿里云 OSS、MinIO 等非 AWS 服务）
+  --region, -r         AWS region（默认: us-east-1）
+  --prefix, -p         远程路径前缀（默认: 空）
+  --forcePathStyle     启用 path-style 访问（默认: true）
+  --content-type       指定 Content-Type（仅单文件上传，默认自动检测）
+  --version, -v        显示版本号
+
+示例:
+  # 上传文件夹到阿里云 OSS
+  s3-upload-folder --dist ./dist --bucket my-bucket --ak LTAI... --sk xxx --endpoint https://oss-cn-hangzhou.aliyuncs.com
+
+  # 上传单个 HTML 文件（自动检测 Content-Type）
+  s3-upload-folder --file index.html --bucket my-bucket --ak xxx --sk xxx --endpoint https://oss-cn-hangzhou.aliyuncs.com
+
+  # 上传到 AWS S3（指定 region）
+  s3-upload-folder --dist ./build --bucket my-bucket --ak xxx --sk xxx --region us-west-2 --forcePathStyle false
 `);
 }
 
@@ -112,7 +124,13 @@ if (options.forcePathStyle === undefined) {
 if (options.file) {
   // 上传单个文件
   if (!fs.existsSync(options.file)) {
-    console.error(`文件不存在: ${options.file}`);
+    console.error(`❌ 错误: 文件不存在: ${options.file}`);
+    console.error(`请检查文件路径是否正确`);
+    process.exit(1);
+  }
+  if (!fs.statSync(options.file).isFile()) {
+    console.error(`❌ 错误: 路径不是文件: ${options.file}`);
+    console.error(`请使用 --dist 参数上传文件夹`);
     process.exit(1);
   }
   uploadFile({
@@ -130,7 +148,13 @@ if (options.file) {
 } else if (options.dist) {
   // 上传文件夹
   if (!fs.existsSync(options.dist)) {
-    console.error(`文件夹不存在: ${options.dist}`);
+    console.error(`❌ 错误: 文件夹不存在: ${options.dist}`);
+    console.error(`请检查文件夹路径是否正确`);
+    process.exit(1);
+  }
+  if (!fs.statSync(options.dist).isDirectory()) {
+    console.error(`❌ 错误: 路径不是文件夹: ${options.dist}`);
+    console.error(`请使用 --file 参数上传单个文件`);
     process.exit(1);
   }
   uploadFolder({
@@ -144,7 +168,7 @@ if (options.file) {
     forcePathStyle: options.forcePathStyle,
   });
 } else {
-  console.error("必须指定 --file 或 --dist 参数之一");
+  console.error("❌ 错误: 必须指定 --file 或 --dist 参数之一");
   printUsage();
   process.exit(1);
 }

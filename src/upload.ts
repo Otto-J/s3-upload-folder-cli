@@ -48,6 +48,33 @@ export function generateRemoteKey(
   return remoteKey;
 }
 
+function detectContentType(filePath: string): string | undefined {
+  const ext = path.extname(filePath).toLowerCase();
+  const mimeTypes: Record<string, string> = {
+    '.html': 'text/html',
+    '.css': 'text/css',
+    '.js': 'application/javascript',
+    '.mjs': 'application/javascript',
+    '.json': 'application/json',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.gif': 'image/gif',
+    '.svg': 'image/svg+xml',
+    '.webp': 'image/webp',
+    '.woff': 'font/woff',
+    '.woff2': 'font/woff2',
+    '.ttf': 'font/ttf',
+    '.pdf': 'application/pdf',
+    '.zip': 'application/zip',
+    '.xml': 'application/xml',
+    '.txt': 'text/plain',
+    '.md': 'text/markdown',
+    '.ico': 'image/x-icon',
+  };
+  return mimeTypes[ext];
+}
+
 export async function uploadFile({
   dist = "",
   filePath,
@@ -68,17 +95,17 @@ export async function uploadFile({
     forcePathStyle,
   });
 
-  // 从文件路径中提取文件名，忽略目录前缀
   const remoteKey = generateRemoteKey(dist, prefix, filePath);
-  console.log(remoteKey);
-
   const fileContent = fs.readFileSync(filePath);
+
+  // 自动检测 Content-Type
+  const finalContentType = contentType || detectContentType(filePath);
 
   const command = new PutObjectCommand({
     Bucket: bucket,
     Key: remoteKey,
     Body: fileContent,
-    ...(contentType ? { ContentType: contentType } : {}),
+    ...(finalContentType ? { ContentType: finalContentType } : {}),
   });
 
   try {
@@ -99,7 +126,7 @@ export async function uploadFolder({
   region,
   prefix = "",
   forcePathStyle = true,
-  maxConcurrentUploads = 1,
+  maxConcurrentUploads = 5,
 }: {
   localFolderPath: string;
   bucket: string;

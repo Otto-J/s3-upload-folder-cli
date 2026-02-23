@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "demo": {
+      "command": "node",
+      "args": ["/Users/otto/mycode/mcp-ts/dist/index.js"],
+      "env": {
+        "NODE_ENV": "development"
+      }
+    }
+  }
+}
